@@ -30,7 +30,23 @@
   <body>
     <div class="w-full flex flex-col items-center">
         <div style="width: 700px;" class="pt-4 flex flex-col h-screen">
-            <p class="MarartSansBoldFont text-6xl pb-4">Flight Simulator</p>
+            <p class="MarartSansBoldFont text-6xl pb-2">Flight Simulator</p>
+            <div 
+                id="progress-status-container"
+                class="pb-1"
+            >
+                <div 
+                    class="MarartSansBoldFont font-thin rounded-lg h-16 w-full "
+                >
+                    Please wait while the game downloads
+                    <div class="border border-black rounded-lg h-8 my-2 mx-1 relative">
+                        <div
+                            id="progress-bar"
+                            class="absolute top-0 left-0 h-full bg-green-500 rounded-lg flex items-center justify-center"
+                        ></div>
+                    </div>
+                </div>
+            </div>
             <canvas style="height: 394px;" id="canvas"></canvas>
             <button id="fullscreen" class="place-self-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mt-4 border border-blue-700 rounded">
                 Fullscreen
@@ -149,8 +165,32 @@
     </div>
     <script defer type="text/javascript">
       var canvas = document.getElementById("canvas");
+      function updateProgressBar(status_log){
+        console.log("progress status", status_log)
+        const [num, den] = status_log.split(
+            '...'
+        )[1].replace(
+            '(', ''
+        ).replace(
+            ')',''
+        ).trim().split(
+            '/'
+        ).map(x => parseInt(x));
+        if(isNaN(num)) return;
+        const new_width = `${((num*100)/den).toFixed(2)}%`;
+        const progress_bar = document.getElementById("progress-bar");
+        progress_bar.style.width = new_width;
+        progress_bar.innerHTML = new_width;
+      }
+      function removeProgressBar(){
+        const ele = document.getElementById("progress-status-container");
+        ele.parentElement.removeChild(ele);
+      }
       var Module = {
-        canvas
+        canvas,
+        setStatus:updateProgressBar,
+        preRun:[()=>console.log("pre run called me")],
+        postRun:[removeProgressBar]
       };
       document.getElementById("fullscreen").addEventListener(
         "click",
